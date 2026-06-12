@@ -45,6 +45,41 @@ def test_country_filter():
     assert set(users["country"].unique()) <= {"Mexico", "Colombia"}
 
 
+def test_amount_mixture_params_present():
+    """v0.2: la mezcla debe existir sin haber tocado las claves v0.1."""
+    P = load_params()
+    mix = P["transactions"]["amount_mixture"]
+    for kind in ("deposit", "withdrawal"):
+        m = mix[kind]
+        assert m["n_components"] == len(m["weights"]) == len(m["mus"]) == len(m["sigmas"])
+        assert abs(sum(m["weights"]) - 1.0) < 1e-4
+        assert all(s > 0 for s in m["sigmas"])
+    # las claves v0.1 siguen intactas
+    assert P["transactions"]["amount_lognormal"]["deposit"]["mu"] == 4.828851565178676
+
+
+def test_amount_mixture_percentiles_close_to_source():
+    """Los montos generados deben reproducir el cuerpo y la cola alta real.
+
+    Referencia: percentiles de depósitos en calibration_params.json.
+    Objetivo v0.2: desvío p99 < 15% (la cola alta era el problema de v0.1).
+    """
+    d = make(n=2000, seed=7).generate()
+    dep = d["transactions"].loc[
+        d["transactions"]["transaction_type"] == "deposit", "amount"
+    ].to_numpy()
+    ref = load_params()["transactions"]["amount_lognormal"]["deposit"]["percentiles"]
+    for p, tol in [(50, 0.25), (90, 0.30), (99, 0.30)]:
+        q = float(np.percentile(dep, p))
+        assert abs(q - ref[str(p)]) / ref[str(p)] < tol, f"p{p}: {q} vs {ref[str(p)]}"
+
+
+def test_amount_mixture_reproducible():
+    a = make(seed=11).generate()["transactions"]["amount"]
+    b = make(seed=11).generate()["transactions"]["amount"]
+    assert (a.values == b.values).all()
+
+
 def test_no_nan_amounts():
     """Regresión: los retiros en fuente son negativos; el fit debe ser sobre |amount|."""
     d = make().generate()

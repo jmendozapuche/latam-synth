@@ -1,7 +1,8 @@
 """Motor de generación sintética calibrado con comportamiento real LatAm 2015-2024.
 
 v0.1: lognormales simples + muestreo directo de distribuciones categóricas.
-v0.2 (ver CLAUDE.md): mezcla de lognormales + snap a montos redondos para la cola alta.
+v0.2: montos de transacción desde mezcla de lognormales (multimodal: micro-depósitos,
+depósitos típicos y depósitos grandes). Pendiente: snap a montos redondos (tarea 2).
 """
 from __future__ import annotations
 
@@ -111,10 +112,16 @@ class SyntheticGenerator:
         return pd.DataFrame(rows)
 
     # ---------- transactions ----------
+    def _sample_amount(self, kind: str) -> float:
+        """Monto desde la mezcla de lognormales calibrada (multimodal real)."""
+        mix = self.P["transactions"]["amount_mixture"][kind]
+        w = np.asarray(mix["weights"])
+        idx = self.rng.choice(mix["n_components"], p=w / w.sum())
+        amount = float(np.exp(self.rng.normal(mix["mus"][idx], mix["sigmas"][idx])))
+        return float(np.clip(amount, 0.01, 1e6))
+
     def generate_transactions(self, goals: pd.DataFrame) -> pd.DataFrame:
         P, rng = self.P, self.rng
-        dl = P["transactions"]["amount_lognormal"]["deposit"]
-        wl = P["transactions"]["amount_lognormal"]["withdrawal"]
         dep_share = P["transactions"]["deposit_share"]
         seas = P["transactions"]["monthly_seasonality"]
         months = np.array([int(k) for k in seas.keys()])
@@ -126,8 +133,7 @@ class SyntheticGenerator:
             n_tx = rng.poisson(self.cfg.tx_per_goal_lambda)
             for _ in range(n_tx):
                 is_dep = rng.random() < dep_share
-                ln = dl if is_dep else wl
-                amount = float(np.clip(rng.lognormal(ln["mu"], ln["sigma"]), 0.01, 1e6))
+                amount = self._sample_amount("deposit" if is_dep else "withdrawal")
                 month = int(rng.choice(months, p=month_p))
                 year = int(rng.integers(self.cfg.start_date.year, self.cfg.end_date.year + 1))
                 day = int(rng.integers(1, 28))
