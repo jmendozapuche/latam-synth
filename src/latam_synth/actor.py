@@ -36,7 +36,12 @@ async def main() -> None:
         if not (1 <= users <= 50_000):
             raise ValueError(f"users debe estar entre 1 y 50,000 (recibido: {users})")
 
-        Actor.log.info(f"Generando {users} usuarios | seed={seed} | formato={fmt}")
+        countries_label = ", ".join(countries) if countries else "todos los países"
+        Actor.log.info(
+            f"Parámetros recibidos: users={users} | seed={seed} | "
+            f"format={fmt} | countries=[{countries_label}] | "
+            f"start_date={start_date} | end_date={end_date}"
+        )
 
         cfg = GeneratorConfig(
             n_users=users,
@@ -48,6 +53,8 @@ async def main() -> None:
         data = SyntheticGenerator(cfg).generate()
 
         store = await Actor.open_key_value_store()
+
+        written_keys: list[str] = []
 
         if fmt == "json":
             def _to_records(df):
@@ -69,14 +76,21 @@ async def main() -> None:
                 "transactions": _to_records(data["transactions"]),
             }
             await store.set_value("OUTPUT", payload, content_type="application/json")
-            Actor.log.info("Resultado escrito: OUTPUT (JSON)")
+            written_keys.append("OUTPUT")
         else:
             for table_name, df in data.items():
                 buf = io.StringIO()
                 df.to_csv(buf, index=False)
                 key = f"{table_name}.csv"
                 await store.set_value(key, buf.getvalue(), content_type="text/csv")
-                Actor.log.info(f"Resultado escrito: {key} ({len(df):,} filas)")
+                written_keys.append(f"{key} ({len(df):,} filas)")
+
+        keys_list = " | ".join(written_keys)
+        Actor.log.info(
+            f"✓ Generación completa — {len(data['users']):,} usuarios, "
+            f"{len(data['goals']):,} metas, {len(data['transactions']):,} transacciones. "
+            f"Archivos disponibles en la pestaña Storage > Key-value store de esta run: {keys_list}"
+        )
 
 
 if __name__ == "__main__":

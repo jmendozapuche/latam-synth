@@ -30,6 +30,21 @@ data["transactions"].head()
 
 Calibración verificada contra datos reales (ver `docs/validation_report.txt`): distribuciones de montos lognormales por tipo de transacción, estacionalidad mensual real (pico de enero post-propósitos, valle de diciembre), 8 categorías de metas con montos y horizontes propios, tasas de logro/abandono reales (73.8% de metas vencidas), uplift de metas compartidas, y scores de usuario correlacionados (cópula gaussiana, ρ=0.89 disciplina-logro).
 
+## Where to find your output (Apify)
+
+After a run completes, your files are in the **Storage** tab of that run:
+
+1. Open the run in [Apify Console](https://console.apify.com) and click the **Storage** tab.
+2. Click **Key-value store**.
+3. You will see the generated files listed by key:
+   - `users.csv` — one row per synthetic user
+   - `goals.csv` — savings goals linked to users
+   - `transactions.csv` — deposit/withdrawal transactions linked to goals
+   - (or `OUTPUT` if you selected `format: json` — contains all three tables in a single JSON)
+4. Click the **download icon** next to each key to save the file.
+
+The run log also prints the exact file names and row counts at the end of execution.
+
 ## API REST
 
 ```bash
