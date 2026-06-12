@@ -49,6 +49,13 @@
       "type": "string",
       "default": "2024-12-31",
       "editor": "textfield"
+    },
+    "push_to_dataset": {
+      "title": "Push transactions to Dataset",
+      "description": "When enabled (default), all generated transactions are pushed to the run's default Dataset so you can export them as JSON/CSV/Excel from the Dataset tab or connect Apify integrations. Disable for very large runs (>10K users) if you only need the CSV files from the Key-value store.",
+      "type": "boolean",
+      "default": true,
+      "editor": "checkbox"
     }
   },
   "required": ["users"]

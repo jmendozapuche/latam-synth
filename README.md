@@ -32,18 +32,30 @@ Calibración verificada contra datos reales (ver `docs/validation_report.txt`): 
 
 ## Where to find your output (Apify)
 
-After a run completes, your files are in the **Storage** tab of that run:
+Every run writes output to two places:
+
+### Key-value store — all three tables
 
 1. Open the run in [Apify Console](https://console.apify.com) and click the **Storage** tab.
 2. Click **Key-value store**.
-3. You will see the generated files listed by key:
+3. Download the generated files:
    - `users.csv` — one row per synthetic user
    - `goals.csv` — savings goals linked to users
    - `transactions.csv` — deposit/withdrawal transactions linked to goals
-   - (or `OUTPUT` if you selected `format: json` — contains all three tables in a single JSON)
+   - `OUTPUT` — always present; JSON summary of the run (parameters used, row counts, list of downloadable keys)
+   - (if `format: json` was selected, `OUTPUT_DATA` contains all three tables in a single JSON file instead of the three CSVs)
 4. Click the **download icon** next to each key to save the file.
 
-The run log also prints the exact file names and row counts at the end of execution.
+### Dataset — transactions (Apify-native export)
+
+By default (`push_to_dataset: true`), all transactions are also pushed to the run's **Dataset**. This lets you:
+
+- Export as **JSON, CSV, or Excel** directly from the **Dataset** tab — no manual download needed.
+- Connect native **Apify integrations** (Google Sheets, webhooks, etc.) to the Dataset output.
+
+To disable for very large runs (> 10K users where you only need the KVS files), set `push_to_dataset: false` in the input.
+
+The run log prints exact file names and row counts at the end of execution.
 
 ## API REST
 
