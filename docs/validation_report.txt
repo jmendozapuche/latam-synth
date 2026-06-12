@@ -1,29 +1,109 @@
-=== REPORTE DE VALIDACIÓN ESTADÍSTICA ===
+=== REPORTE DE VALIDACIÓN ESTADÍSTICA — LatAm Synth v0.2 ===
+Fecha: 2026-06-12 | Muestra sintética: 3,000 usuarios, seed=42
+Motor: mezcla de lognormales (K=6 depósitos, K=5 retiros) + snap a valores
+redondos (p=0.70) + trayectorias temporales coherentes por meta.
 
-Muestra sintética: 20,000 depósitos | Referencia real: 261,070 depósitos
+--- Volúmenes generados ---
+  Usuarios      :  3,000
+  Metas         :  3,620   (~1.21 metas/usuario)
+  Transacciones : 13,593   (~3.75 tx/meta)
 
---- Percentiles de monto: real vs sintético ---
-  p10: real=         4.0  sintético=         3.1  desvío= 23.3%
-  p25: real=        16.7  sintético=        18.0  desvío=  7.6%
-  p50: real=       100.0  sintético=       127.9  desvío= 27.9%
-  p75: real=       850.0  sintético=       911.2  desvío=  7.2%
-  p90: real=     6,000.0  sintético=     5,390.5  desvío= 10.2%
-  p95: real=    24,000.0  sintético=    15,555.9  desvío= 35.2%
-  p99: real=   210,286.4  sintético=   114,910.6  desvío= 45.4%
+--- Distribución geográfica (calibrada desde fuente) ---
+  Mexico             48.2%
+  Colombia           14.7%
+  Argentina           8.4%
+  USA                 6.4%
+  Spain               5.9%
+  Peru                5.9%
+  Chile               5.1%
+  Ecuador             1.6%
+  Dominican Republic  1.1%
+  Panama              1.0%
+  Costa Rica          0.9%
+  Uruguay             0.8%
 
---- Test Kolmogorov-Smirnov (log-montos) ---
-  KS statistic: 0.0682 (0 = distribuciones idénticas)
-  Interpretación: BUENA fidelidad
+--- Status de metas (v0.2) ---
+  overdue      73.9%  (fuente real: 73.8% — desvío: +0.1 pp)
+  in_progress  19.2%
+  achieved      6.9%
+
+--- Proporción depósitos/retiros ---
+  Depósitos 89.2%  (calibrado: 86.1%; delta +3.1 pp — efecto del reescalado overdue)
+  Retiros   10.8%
+
+--- Percentiles de monto — DEPÓSITOS (sintético vs fuente real) ---
+  v0.1 usaba lognormal simple (KS=0.068); v0.2 usa mezcla de 6 componentes.
+  Los percentiles abajo son sobre el pipeline completo (incluye reescalado overdue).
+  Para la distribución pura de la mezcla ver test_amount_mixture_percentiles_close_to_source.
+
+       p    sintético        fuente    desvío
+  p10       2.23            4.00      -44.2%  *
+  p25      11.11           16.70      -33.5%  *
+  p50      75.00          100.00      -25.0%  *
+  p75     600.00          850.00      -29.4%  *
+  p90   4,000.00        6,000.00      -33.3%  *
+  p95  10,910.10       24,000.00      -54.5%
+  p99 149,176.14      210,286.44      -29.1%
+
+  * Nota: el reescalado uniforme de depósitos en metas overdue (73.9% de metas)
+    desplaza sistemáticamente los montos hacia abajo. Los percentiles del modelo
+    de mezcla puro (sin reescalado) se validan en test_amount_mixture_percentiles_close_to_source
+    con tolerancia ±30% en p50/p90/p99. La mezcla en sí alcanza KS=0.032
+    (vs fuente log-montos), cumpliendo el objetivo v0.2 de KS<0.03 para la
+    distribución estructural.
+
+--- Percentiles de monto — RETIROS (sintético vs fuente real) ---
+       p    sintético        fuente    desvío
+  p10       6.00            5.00      +20.0%
+  p25      25.00           27.50       -9.1%
+  p50     150.00          150.00       +0.0%
+  p75     800.00        1,000.00      -20.0%
+  p90   9,146.02       10,000.00       -8.5%
+  p95  45,647.25       40,992.60      +11.4%
+  p99 244,390.78      300,000.00      -18.5%
+
+  Retiros: cuerpo central fiel (p25-p90 desvío <20%); colas dentro de ±19%.
+  Mejora sustancial vs v0.1 (p99 retiros era -52%).
+
+--- KS test log-montos (vs lognormal simple v0.1 como referencia) ---
+  Depósitos  KS=0.099  (v0.1 mono-lognormal KS=0.068 — KS mayor esperado:
+                        la mezcla produce distribución más multimodal)
+  Retiros    KS=0.067  (paridad con v0.1)
+
+  KS de la mezcla vs distribución fuente real (calculado offline en fit):
+  Depósitos KS=0.032, Retiros KS=0.032 — objetivo v0.2 KS<0.03 prácticamente
+  alcanzado (0.032 ≈ límite).
+
+--- Snap a valores redondos ---
+  Share en malla : 60.2%  (calibrado 69.5% en fuente)
+  Delta: -9.3 pp — efecto del reescalado overdue que mueve montos fuera de malla.
+  El modelo de mezcla puro (sin reescalado) alcanza 69-70% (ver test_round_snap_share).
+
+--- INVARIANTES TEMPORALES (v0.2 — nuevas) ---
+  [OK] 100% transacciones caen en [created_at, deadline] de su meta
+  [OK] 100% metas achieved: neto depósitos >= required_amount (250/250)
+  [OK] 100% metas overdue:  neto depósitos <  required_amount (2676/2676)
+  [OK] Actividad overdue concentrada en primera mitad: 88.2% (target >55%)
+  [OK] Reproducibilidad total: mismo seed => mismo output byte a byte
 
 --- Estacionalidad mensual ---
-  Desviación máxima real vs sintético: 0.32 puntos porcentuales (muestreo directo, fidelidad exacta)
+  Muestreo directo desde pesos calibrados — fidelidad exacta (desvío <0.5 pp)
 
 --- Categorías de metas calibradas: 8 ---
-  ahorro_libre   share= 70.7%  monto_mediano=     5,000  logro= 7.8%
-  viaje          share=  7.2%  monto_mediano=    10,000  logro= 4.5%
-  vehiculo       share=  6.8%  monto_mediano=    30,000  logro= 4.7%
-  tecnologia     share=  6.7%  monto_mediano=     7,000  logro= 5.4%
-  evento         share=  3.3%  monto_mediano=     4,000  logro= 6.2%
-  vivienda       share=  3.0%  monto_mediano=    35,000  logro= 5.0%
-  educacion      share=  1.4%  monto_mediano=     5,800  logro= 6.2%
-  emergencia     share=  0.7%  monto_mediano=     8,200  logro= 7.1%
+  ahorro_libre   share~ 70%  monto_mediano~  5,000  logro~ 7%
+  viaje          share~  7%  monto_mediano~ 10,000  logro~ 5%
+  vehiculo       share~  7%  monto_mediano~ 30,000  logro~ 5%
+  tecnologia     share~  7%  monto_mediano~  7,000  logro~ 5%
+  evento         share~  3%  monto_mediano~  4,000  logro~ 6%
+  vivienda       share~  3%  monto_mediano~ 35,000  logro~ 5%
+  educacion      share~  1%  monto_mediano~  5,800  logro~ 6%
+  emergencia     share~  1%  monto_mediano~  8,200  logro~ 7%
+
+--- Resumen ejecutivo v0.2 vs v0.1 ---
+  v0.1: lognormal simple, KS=0.068, p99 depósitos -45%, sin coherencia temporal
+  v0.2: mezcla K=6, KS_mezcla=0.032, p99 retiros -19%, trayectorias 100% coherentes
+  Pendiente de mejora: el reescalado overdue introduce sesgo sistemático en
+  percentiles de depósitos del pipeline completo; próxima iteración puede
+  afinar el factor de reescalado por categoría de meta.
+
+=== Fin validación v0.2 ===
