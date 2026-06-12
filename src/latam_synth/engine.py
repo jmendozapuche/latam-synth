@@ -1,7 +1,8 @@
 """Motor de generación sintética calibrado con comportamiento real LatAm 2015-2024.
 
 v0.1: lognormales simples + muestreo directo de distribuciones categóricas.
-v0.2 (ver CLAUDE.md): mezcla de lognormales + snap a montos redondos para la cola alta.
+v0.2: montos de transacción desde mezcla de lognormales (multimodal: micro-depósitos,
+depósitos típicos y depósitos grandes) + snap a valores redondos calibrado contra fuente.
 """
 from __future__ import annotations
 
@@ -111,10 +112,29 @@ class SyntheticGenerator:
         return pd.DataFrame(rows)
 
     # ---------- transactions ----------
+    # Malla de valores redondos: por cada orden de magnitud, estos multiplicadores.
+    _SNAP_GRID = np.array([1, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 8, 10], dtype=float)
+
+    def _snap_to_round(self, x: float) -> float:
+        """Redondea x al valor de la malla de montos redondos más cercano."""
+        mag = 10.0 ** np.floor(np.log10(max(x, 1e-9)))
+        candidates = mag * self._SNAP_GRID
+        return float(candidates[np.argmin(np.abs(candidates - x))])
+
+    def _sample_amount(self, kind: str) -> float:
+        """Monto desde la mezcla calibrada, con snap a valores redondos."""
+        mix = self.P["transactions"]["amount_mixture"][kind]
+        w = np.asarray(mix["weights"])
+        idx = self.rng.choice(mix["n_components"], p=w / w.sum())
+        amount = float(np.exp(self.rng.normal(mix["mus"][idx], mix["sigmas"][idx])))
+        amount = float(np.clip(amount, 0.01, 1e6))
+        snap_cfg = self.P["transactions"]["round_snap"]
+        if self.rng.random() < snap_cfg["snap_probability"]:
+            amount = self._snap_to_round(amount)
+        return amount
+
     def generate_transactions(self, goals: pd.DataFrame) -> pd.DataFrame:
         P, rng = self.P, self.rng
-        dl = P["transactions"]["amount_lognormal"]["deposit"]
-        wl = P["transactions"]["amount_lognormal"]["withdrawal"]
         dep_share = P["transactions"]["deposit_share"]
         seas = P["transactions"]["monthly_seasonality"]
         months = np.array([int(k) for k in seas.keys()])
@@ -126,8 +146,7 @@ class SyntheticGenerator:
             n_tx = rng.poisson(self.cfg.tx_per_goal_lambda)
             for _ in range(n_tx):
                 is_dep = rng.random() < dep_share
-                ln = dl if is_dep else wl
-                amount = float(np.clip(rng.lognormal(ln["mu"], ln["sigma"]), 0.01, 1e6))
+                amount = self._sample_amount("deposit" if is_dep else "withdrawal")
                 month = int(rng.choice(months, p=month_p))
                 year = int(rng.integers(self.cfg.start_date.year, self.cfg.end_date.year + 1))
                 day = int(rng.integers(1, 28))
