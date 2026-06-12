@@ -1,0 +1,36 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "LatAm Synth — Output",
+  "properties": {
+    "transactions_dataset": {
+      "type": "string",
+      "title": "Transactions (Dataset — export as JSON/CSV/Excel)",
+      "template": "{{storages.datasets.default.apiUrl}}/items?view=transactions"
+    },
+    "run_summary": {
+      "type": "string",
+      "title": "Run summary (parameters, row counts, file list)",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/OUTPUT"
+    },
+    "users_csv": {
+      "type": "string",
+      "title": "users.csv — synthetic users",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/users.csv"
+    },
+    "goals_csv": {
+      "type": "string",
+      "title": "goals.csv — savings goals",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/goals.csv"
+    },
+    "transactions_csv": {
+      "type": "string",
+      "title": "transactions.csv — deposit/withdrawal transactions",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/transactions.csv"
+    },
+    "all_kvs_files": {
+      "type": "string",
+      "title": "All Key-value store files",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/keys"
+    }
+  }
+}
