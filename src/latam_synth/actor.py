@@ -2,6 +2,7 @@
 
 Lee el input del key-value store de Apify (INPUT), genera el dataset sintético
 y escribe los archivos de salida al key-value store. Además:
+- Cobra pay-per-event ('users-generated', count=N) por cada usuario generado.
 - Siempre escribe un registro OUTPUT con resumen JSON de la corrida.
 - Pushea las transacciones al Dataset por defecto (exportable desde Apify UI)
   salvo que push_to_dataset=false.
@@ -14,6 +15,9 @@ from datetime import date, datetime
 from apify import Actor
 
 from latam_synth import GeneratorConfig, SyntheticGenerator
+
+# Nombre del evento PPE — debe coincidir con el configurado en Apify Console.
+_PPE_EVENT = "users-generated"
 
 
 def _parse_date(s: str | None, default: date) -> date:
@@ -51,6 +55,21 @@ async def main() -> None:
             f"push_to_dataset={push_to_dataset} | "
             f"start_date={start_date} | end_date={end_date}"
         )
+
+        # --- Cobro pay-per-event: se cobra antes de generar para que el
+        # usuario vea el cargo aunque cancele, y el límite de gasto se respete.
+        charge_result = await Actor.charge(event_name=_PPE_EVENT, count=users)
+        Actor.log.info(
+            f"PPE: {users} evento(s) '{_PPE_EVENT}' cobrado(s). "
+            f"Límite alcanzado: {charge_result.event_charge_limit_reached}"
+        )
+        if charge_result.event_charge_limit_reached:
+            Actor.log.warning(
+                "El usuario ha alcanzado su límite de gasto. "
+                "El actor se detiene para respetar el presupuesto configurado."
+            )
+            await Actor.exit(exit_code=0, status_message="Spending limit reached")
+            return
 
         cfg = GeneratorConfig(
             n_users=users,
@@ -114,7 +133,6 @@ async def main() -> None:
         # --- Dataset por defecto (exportador nativo de Apify) ---
         if push_to_dataset:
             tx_records = _to_records(data["transactions"])
-            # push_data acepta listas; Apify recomienda chunks de ≤1000 filas
             chunk = 1000
             for i in range(0, len(tx_records), chunk):
                 await Actor.push_data(tx_records[i : i + chunk])
