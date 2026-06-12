@@ -1,18 +1,20 @@
 # LatAm Synth — Synthetic Financial Savings Data Generator
 
-Generate realistic synthetic datasets of financial saving behavior for Latin America, calibrated on 506,311 real records (2015–2024). Outputs users, savings goals, and transactions with full referential integrity, 100% synthetic, zero PII.
+Generate realistic synthetic test data for fintech applications, calibrated on 506,311 real LatAm records (2015–2024). Use it to generate synthetic datasets for ML training, mock financial transactions for integration testing, realistic fake user data for testing pipelines, or seed data for fintech development — all with full referential integrity, 100% synthetic, zero PII.
+
+Each run produces linked users, savings goals, and deposit/withdrawal transactions that behave statistically like real Latin American savings-app data.
 
 ## What you get
 
-Each run produces three linked tables:
+Each run produces three linked tables of synthetic dataset output:
 
 | Table | Description |
 |---|---|
 | `users` | Synthetic users with country, scores, join date |
 | `goals` | Savings goals with category, required amount, status (achieved / overdue / in_progress) |
-| `transactions` | Deposits and withdrawals within each goal's window |
+| `transactions` | Mock financial transactions — deposits and withdrawals within each goal's time window |
 
-**Calibrated against real data:** lognormal mixture distributions (KS=0.032), 69.5% round-value snap, 73.8% overdue rate, monthly seasonality, 8 goal categories with realistic amounts and horizons.
+**Calibrated against real data:** lognormal mixture distributions (KS=0.032), 69.5% round-value snap, 73.8% overdue rate, monthly seasonality, 8 goal categories with realistic amounts and horizons. Suitable as a synthetic dataset for ML training or as realistic fake user data for testing any fintech system.
 
 ## Pricing — Pay Per Event
 
@@ -66,6 +68,39 @@ When `push_to_dataset=true` (default), all transactions appear in the run's **Da
 - **ML training data** — bootstrap churn, recommendation, and segmentation models with real LatAm patterns
 - **Demos & POCs** — dashboards with publicly shareable synthetic data
 - **Education** — unlimited datasets for data science courses with real business narrative
+
+## For AI agents
+
+This actor is designed to be invoked programmatically. Minimum input to generate synthetic test data:
+
+```json
+{
+  "users": 500,
+  "seed": 42
+}
+```
+
+Full input with all options:
+
+```json
+{
+  "users": 1000,
+  "seed": 42,
+  "countries": ["Mexico", "Colombia"],
+  "format": "csv",
+  "push_to_dataset": true,
+  "start_date": "2023-01-01",
+  "end_date": "2024-12-31"
+}
+```
+
+**Reading the output after the run completes:**
+
+- **Dataset items** (transactions): `GET {run.defaultDatasetId}/items` — paginated JSON, directly iterable.
+- **CSV files** (users, goals, transactions): `GET {run.defaultKeyValueStoreId}/records/users.csv`, `.../goals.csv`, `.../transactions.csv`.
+- **Run summary** (row counts, parameter echo): `GET {run.defaultKeyValueStoreId}/records/OUTPUT` — JSON, always present.
+
+The `seed` parameter guarantees deterministic output: the same seed always produces the same rows, useful for reproducible test fixtures. Omit `seed` for a random run.
 
 ## Privacy & compliance
 
