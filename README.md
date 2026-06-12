@@ -30,6 +30,33 @@ data["transactions"].head()
 
 Calibración verificada contra datos reales (ver `docs/validation_report.txt`): distribuciones de montos lognormales por tipo de transacción, estacionalidad mensual real (pico de enero post-propósitos, valle de diciembre), 8 categorías de metas con montos y horizontes propios, tasas de logro/abandono reales (73.8% de metas vencidas), uplift de metas compartidas, y scores de usuario correlacionados (cópula gaussiana, ρ=0.89 disciplina-logro).
 
+## API REST
+
+```bash
+pip install -e ".[api]"
+uvicorn latam_synth.api:app --port 8000
+```
+
+```bash
+# JSON con las tres tablas (users, goals, transactions)
+curl -s -X POST http://localhost:8000/generate \
+  -H "Content-Type: application/json" \
+  -d '{"users": 100, "seed": 42, "countries": ["Mexico", "Colombia"]}' | jq .meta
+# {"users": 100, "goals": 121, "transactions": 453}
+
+# CSV de transacciones directamente
+curl -s -X POST http://localhost:8000/generate \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/csv" \
+  -d '{"users": 500, "seed": 7}' -o transactions.csv
+
+# Health check
+curl http://localhost:8000/health
+# {"status": "ok", "version": "0.2.0"}
+```
+
+Rate limit: 10 requests/min por IP. Máximo 50,000 usuarios por request.
+
 ## Desarrollo
 
 ```bash
@@ -37,4 +64,4 @@ pip install -e ".[dev]"
 pytest
 ```
 
-Roadmap v0.2 en `CLAUDE.md` (mezcla de lognormales para la cola alta, trayectorias temporales coherentes, API, actor de Apify).
+Changelog: v0.2 añade mezcla de lognormales (KS=0.032), snap a valores redondos (69.5% en malla), trayectorias temporales coherentes por meta (100% tx en ventana [created_at, deadline]), API FastAPI y actor Apify.

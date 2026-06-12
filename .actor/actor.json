@@ -1,0 +1,29 @@
+{
+  "actorSpecification": 1,
+  "name": "latam-synth",
+  "title": "LatAm Financial Savings Behavior Synthesizer",
+  "description": "Generates realistic synthetic datasets of financial saving behavior for Latin America, calibrated on 506K real records (2015-2024). Outputs users, savings goals and transactions with full referential integrity.",
+  "version": "0.2.0",
+  "buildTag": "latest",
+  "dockerfile": "../Dockerfile.apify",
+  "input": "./INPUT_SCHEMA.json",
+  "storages": {
+    "keyValueStore": {
+      "actorSpecification": 1,
+      "views": {
+        "output": {
+          "title": "Output files",
+          "transformation": { "fields": ["key", "contentType", "url"] },
+          "display": {
+            "component": "table",
+            "columns": [
+              { "label": "File", "field": "key" },
+              { "label": "Type", "field": "contentType" },
+              { "label": "Download", "field": "url" }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
