@@ -80,6 +80,23 @@ def test_amount_mixture_reproducible():
     assert (a.values == b.values).all()
 
 
+def test_round_snap_share():
+    """~70% de los montos deben caer en la malla de valores redondos (calibrado: 69.5%)."""
+    d = make(n=1000, seed=5).generate()
+    amounts = d["transactions"]["amount"].to_numpy()
+    grid = np.array([1, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 8, 10])
+    mags = 10.0 ** np.floor(np.log10(np.maximum(amounts, 1e-9)))
+    candidates = mags[:, None] * grid[None, :]
+    on_grid = np.isclose(candidates, amounts[:, None]).any(axis=1)
+    assert 0.55 < on_grid.mean() < 0.85, f"snap share: {on_grid.mean():.2f}"
+
+
+def test_round_snap_reproducible():
+    a = make(seed=17).generate()["transactions"]["amount"]
+    b = make(seed=17).generate()["transactions"]["amount"]
+    assert (a.values == b.values).all()
+
+
 def test_no_nan_amounts():
     """Regresión: los retiros en fuente son negativos; el fit debe ser sobre |amount|."""
     d = make().generate()
