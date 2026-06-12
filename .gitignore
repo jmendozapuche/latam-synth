@@ -1,0 +1,9 @@
+__pycache__/
+*.egg-info/
+.pytest_cache/
+output/
+dist/
+# NUNCA commitear datos fuente reales
+*.csv
+!docs/*.csv
+enriched*

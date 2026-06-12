@@ -1,0 +1,425 @@
+{
+  "meta": {
+    "source": "Coinch open data 2015-2024 (private reference)",
+    "generated": "2026-06-11",
+    "source_rows": {
+      "transactions": 305808,
+      "goals": 108570,
+      "users": 91933
+    },
+    "cleaning_rules": "amounts clipped to (0, 1e6]; horizons to (0, 2000] days; invalid countries excluded from geo mix; withdrawals fitted on absolute value (source stores them negative)"
+  },
+  "transactions": {
+    "deposit_share": 0.8608571391199707,
+    "amount_lognormal": {
+      "deposit": {
+        "mu": 4.828851565178676,
+        "sigma": 2.9122713404891067,
+        "percentiles": {
+          "1": 0.4,
+          "5": 1.2,
+          "10": 4.0,
+          "25": 16.7,
+          "50": 100.0,
+          "75": 850.0,
+          "90": 6000.0,
+          "95": 24000.0,
+          "99": 210286.43999999785
+        }
+      },
+      "withdrawal": {
+        "mu": 5.22494904866953,
+        "sigma": 2.9037292690451606,
+        "percentiles": {
+          "1": 0.5,
+          "5": 2.0,
+          "10": 5.0,
+          "25": 27.5,
+          "50": 150.0,
+          "75": 1000.0,
+          "90": 10000.0,
+          "95": 40992.60000000011,
+          "99": 300000.0
+        },
+        "note": "ajustado sobre valor absoluto; los retiros en fuente son negativos"
+      }
+    },
+    "monthly_seasonality": {
+      "1": 0.0977,
+      "2": 0.0865,
+      "3": 0.0806,
+      "4": 0.0763,
+      "5": 0.0778,
+      "6": 0.0782,
+      "7": 0.0774,
+      "8": 0.0921,
+      "9": 0.0941,
+      "10": 0.091,
+      "11": 0.078,
+      "12": 0.0703
+    },
+    "weekday_distribution": {
+      "0": 0.1559,
+      "1": 0.149,
+      "2": 0.1384,
+      "3": 0.1379,
+      "4": 0.1407,
+      "5": 0.1399,
+      "6": 0.1382
+    }
+  },
+  "goals": {
+    "status_distribution": {
+      "overdue": 0.7376,
+      "in_progress": 0.1923,
+      "achieved": 0.0701
+    },
+    "shared_share": 0.021423966104817168,
+    "shared_uplift": {
+      "achieved_rate_shared": 0.08899398108340499,
+      "achieved_rate_individual": 0.0696415797597982,
+      "amount_multiplier_median": 1.6666666666666667
+    },
+    "categories": {
+      "tecnologia": {
+        "share": 0.06736667587731418,
+        "required_amount_lognormal": {
+          "mu": 9.122457125978082,
+          "sigma": 2.568954400196769,
+          "percentiles": {
+            "1": 20.0,
+            "5": 200.0,
+            "10": 450.0,
+            "25": 2000.0,
+            "50": 7000.0,
+            "75": 20000.0,
+            "90": 600000.0,
+            "95": 1300000.0,
+            "99": 3700000.0
+          }
+        },
+        "horizon_days_median": 124.0,
+        "horizon_days_iqr": [
+          62.0,
+          243.0
+        ],
+        "achieved_rate": 0.05423914532255855,
+        "sample_names": [
+          "celular",
+          "Celular",
+          "iphone",
+          "celular ",
+          "iPhone",
+          "laptop",
+          "Laptop",
+          "Iphone"
+        ]
+      },
+      "ahorro_libre": {
+        "share": 0.7074882564244266,
+        "required_amount_lognormal": {
+          "mu": 8.592456309177335,
+          "sigma": 2.8968452513985308,
+          "percentiles": {
+            "1": 10.0,
+            "5": 55.0,
+            "10": 180.0,
+            "25": 854.5,
+            "50": 5000.0,
+            "75": 30000.0,
+            "90": 350000.0,
+            "95": 1000000.0,
+            "99": 5000000.0
+          }
+        },
+        "horizon_days_median": 100.0,
+        "horizon_days_iqr": [
+          34.0,
+          238.0
+        ],
+        "achieved_rate": 0.0780094325989569,
+        "sample_names": [
+          "ahorro",
+          "Ahorro",
+          "Ropa",
+          "ropa",
+          "libre",
+          "Ahorros",
+          "futuro",
+          "negocio"
+        ]
+      },
+      "vehiculo": {
+        "share": 0.0683982683982684,
+        "required_amount_lognormal": {
+          "mu": 10.244608242819229,
+          "sigma": 2.6574741390168213,
+          "percentiles": {
+            "1": 20.0,
+            "5": 250.0,
+            "10": 1000.0,
+            "25": 7000.0,
+            "50": 30000.0,
+            "75": 100000.0,
+            "90": 1300000.0,
+            "95": 3500000.0,
+            "99": 8000000.0
+          }
+        },
+        "horizon_days_median": 213.0,
+        "horizon_days_iqr": [
+          112.0,
+          365.0
+        ],
+        "achieved_rate": 0.0466584328255798,
+        "sample_names": [
+          "carro",
+          "auto",
+          "moto",
+          "Auto",
+          "Carro",
+          "Moto",
+          "coche",
+          "Coche"
+        ]
+      },
+      "viaje": {
+        "share": 0.07150225660863958,
+        "required_amount_lognormal": {
+          "mu": 9.551226598174793,
+          "sigma": 2.740646550620413,
+          "percentiles": {
+            "1": 15.0,
+            "5": 200.0,
+            "10": 500.0,
+            "25": 3000.0,
+            "50": 10000.0,
+            "75": 50000.0,
+            "90": 1000000.0,
+            "95": 2000000.0,
+            "99": 6000000.0
+          }
+        },
+        "horizon_days_median": 178.0,
+        "horizon_days_iqr": [
+          91.0,
+          310.0
+        ],
+        "achieved_rate": 0.04487096355855272,
+        "sample_names": [
+          "viaje",
+          "vacaciones",
+          "Vacaciones",
+          "Viaje",
+          "vacaciones ",
+          "viaje ",
+          "cancun",
+          "Vacaciones "
+        ]
+      },
+      "evento": {
+        "share": 0.03304780326056922,
+        "required_amount_lognormal": {
+          "mu": 8.38025326998843,
+          "sigma": 2.619862170054639,
+          "percentiles": {
+            "1": 10.0,
+            "5": 55.25000000000006,
+            "10": 200.0,
+            "25": 900.0,
+            "50": 4000.0,
+            "75": 20600.0,
+            "90": 150000.0,
+            "95": 400000.0,
+            "99": 2000000.0
+          }
+        },
+        "horizon_days_median": 100.0,
+        "horizon_days_iqr": [
+          47.0,
+          208.0
+        ],
+        "achieved_rate": 0.06225572305974316,
+        "sample_names": [
+          "Navidad",
+          "navidad",
+          "Boda",
+          "boda",
+          "cumpleaÃ±os",
+          "Navidad ",
+          "cumple",
+          "CumpleaÃ±os"
+        ]
+      },
+      "vivienda": {
+        "share": 0.03047803260569218,
+        "required_amount_lognormal": {
+          "mu": 10.366287388323059,
+          "sigma": 3.019395646872443,
+          "percentiles": {
+            "1": 12.389999999999997,
+            "5": 150.0,
+            "10": 600.0,
+            "25": 5000.0,
+            "50": 35000.0,
+            "75": 300000.0,
+            "90": 1835000.0000000137,
+            "95": 4000000.0,
+            "99": 10000000.0
+          }
+        },
+        "horizon_days_median": 273.5,
+        "horizon_days_iqr": [
+          108.0,
+          444.0
+        ],
+        "achieved_rate": 0.050417469492614005,
+        "sample_names": [
+          "casa",
+          "Casa",
+          "terreno",
+          "casa ",
+          "Terreno",
+          "Departamento",
+          "CASA",
+          "Casa "
+        ]
+      },
+      "educacion": {
+        "share": 0.014221239753154646,
+        "required_amount_lognormal": {
+          "mu": 9.259538884200843,
+          "sigma": 3.043274271127247,
+          "percentiles": {
+            "1": 10.0,
+            "5": 135.8,
+            "10": 300.0,
+            "25": 1300.0,
+            "50": 5800.0,
+            "75": 83000.0,
+            "90": 1000000.0,
+            "95": 2500000.0,
+            "99": 5000000.0
+          }
+        },
+        "horizon_days_median": 115.5,
+        "horizon_days_iqr": [
+          41.25,
+          237.75
+        ],
+        "achieved_rate": 0.06212822207534699,
+        "sample_names": [
+          "Universidad",
+          "universidad",
+          "escuela",
+          "Escuela",
+          "Universidad ",
+          "estudios",
+          "universidad ",
+          "Estudios"
+        ]
+      },
+      "emergencia": {
+        "share": 0.007497467071935157,
+        "required_amount_lognormal": {
+          "mu": 8.929464270883303,
+          "sigma": 2.904309974644081,
+          "percentiles": {
+            "1": 5.0,
+            "5": 50.0,
+            "10": 200.0,
+            "25": 1075.0,
+            "50": 8200.0,
+            "75": 35000.0,
+            "90": 500000.0,
+            "95": 1000000.0,
+            "99": 5000000.0
+          }
+        },
+        "horizon_days_median": 186.0,
+        "horizon_days_iqr": [
+          82.0,
+          358.0
+        ],
+        "achieved_rate": 0.0708955223880597,
+        "sample_names": [
+          "Emergencias",
+          "emergencia",
+          "Emergencia",
+          "emergencias",
+          "fondo",
+          "emergencia ",
+          "Emergencia ",
+          "Fondo de emergencia"
+        ]
+      }
+    },
+    "saving_rate_percentiles": {
+      "10": 0.0,
+      "25": 0.0,
+      "50": 3.3333333333333335e-05,
+      "75": 0.1,
+      "90": 0.5833333333333334
+    }
+  },
+  "users": {
+    "geo_mix": {
+      "Mexico": 0.4658,
+      "Colombia": 0.1444,
+      "Argentina": 0.0907,
+      "USA": 0.0615,
+      "Spain": 0.0578,
+      "Peru": 0.0546,
+      "Chile": 0.0512,
+      "Ecuador": 0.0173,
+      "Dominican Republic": 0.0107,
+      "Costa Rica": 0.008,
+      "Panama": 0.0079,
+      "Uruguay": 0.0066
+    },
+    "scores": {
+      "gamification_score": {
+        "10": 0.09933774940603718,
+        "25": 0.2482050892518622,
+        "50": 0.4994023810356237,
+        "75": 0.7500783221892101,
+        "90": 0.9005450637321702,
+        "99": 0.9904113292985172
+      },
+      "savings_discipline_score": {
+        "10": 0.0287942246453783,
+        "25": 0.0656468475047712,
+        "50": 0.1242371799637782,
+        "75": 0.1802164403234579,
+        "90": 0.2734352238955746,
+        "99": 0.939982244665139
+      },
+      "goals_completed_ratio": {
+        "10": 0.0,
+        "25": 0.0,
+        "50": 0.0,
+        "75": 0.0,
+        "90": 0.0,
+        "99": 1.0
+      }
+    },
+    "score_correlations": {
+      "gamification_score": {
+        "gamification_score": 1.0,
+        "savings_discipline_score": 0.3391,
+        "goals_completed_ratio": -0.0004
+      },
+      "savings_discipline_score": {
+        "gamification_score": 0.3391,
+        "savings_discipline_score": 1.0,
+        "goals_completed_ratio": 0.887
+      },
+      "goals_completed_ratio": {
+        "gamification_score": -0.0004,
+        "savings_discipline_score": 0.887,
+        "goals_completed_ratio": 1.0
+      }
+    },
+    "zero_goals_completed_share": 0.9370954934571917
+  }
+}

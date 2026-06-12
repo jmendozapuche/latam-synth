@@ -1,0 +1,29 @@
+=== REPORTE DE VALIDACIÓN ESTADÍSTICA ===
+
+Muestra sintética: 20,000 depósitos | Referencia real: 261,070 depósitos
+
+--- Percentiles de monto: real vs sintético ---
+  p10: real=         4.0  sintético=         3.1  desvío= 23.3%
+  p25: real=        16.7  sintético=        18.0  desvío=  7.6%
+  p50: real=       100.0  sintético=       127.9  desvío= 27.9%
+  p75: real=       850.0  sintético=       911.2  desvío=  7.2%
+  p90: real=     6,000.0  sintético=     5,390.5  desvío= 10.2%
+  p95: real=    24,000.0  sintético=    15,555.9  desvío= 35.2%
+  p99: real=   210,286.4  sintético=   114,910.6  desvío= 45.4%
+
+--- Test Kolmogorov-Smirnov (log-montos) ---
+  KS statistic: 0.0682 (0 = distribuciones idénticas)
+  Interpretación: BUENA fidelidad
+
+--- Estacionalidad mensual ---
+  Desviación máxima real vs sintético: 0.32 puntos porcentuales (muestreo directo, fidelidad exacta)
+
+--- Categorías de metas calibradas: 8 ---
+  ahorro_libre   share= 70.7%  monto_mediano=     5,000  logro= 7.8%
+  viaje          share=  7.2%  monto_mediano=    10,000  logro= 4.5%
+  vehiculo       share=  6.8%  monto_mediano=    30,000  logro= 4.7%
+  tecnologia     share=  6.7%  monto_mediano=     7,000  logro= 5.4%
+  evento         share=  3.3%  monto_mediano=     4,000  logro= 6.2%
+  vivienda       share=  3.0%  monto_mediano=    35,000  logro= 5.0%
+  educacion      share=  1.4%  monto_mediano=     5,800  logro= 6.2%
+  emergencia     share=  0.7%  monto_mediano=     8,200  logro= 7.1%
