@@ -1,0 +1,55 @@
+{
+  "title": "LatAm Synth — Input",
+  "description": "Parameters for generating synthetic LatAm financial savings behavior data.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "users": {
+      "title": "Number of users",
+      "description": "How many synthetic users to generate. Each user gets 0–N saving goals and transactions.",
+      "type": "integer",
+      "default": 1000,
+      "minimum": 1,
+      "maximum": 50000,
+      "editor": "number"
+    },
+    "seed": {
+      "title": "Random seed",
+      "description": "Integer seed for full reproducibility. Leave empty for a random run.",
+      "type": "integer",
+      "editor": "number",
+      "nullable": true
+    },
+    "countries": {
+      "title": "Countries",
+      "description": "Restrict output to specific countries. Leave empty to use the calibrated LatAm mix (Mexico 46.6%, Colombia 14.4%, Argentina 9.1%, …). Valid values: Mexico, Colombia, Argentina, USA, Spain, Peru, Chile, Ecuador, Dominican Republic, Costa Rica, Panama, Uruguay.",
+      "type": "array",
+      "items": { "type": "string" },
+      "editor": "stringList",
+      "nullable": true
+    },
+    "format": {
+      "title": "Output format",
+      "description": "File format for the output stored in the key-value store.",
+      "type": "string",
+      "enum": ["json", "csv"],
+      "default": "csv",
+      "editor": "select"
+    },
+    "start_date": {
+      "title": "Start date",
+      "description": "Start of the generation period (YYYY-MM-DD).",
+      "type": "string",
+      "default": "2023-01-01",
+      "editor": "textfield"
+    },
+    "end_date": {
+      "title": "End date",
+      "description": "End of the generation period (YYYY-MM-DD).",
+      "type": "string",
+      "default": "2024-12-31",
+      "editor": "textfield"
+    }
+  },
+  "required": ["users"]
+}
