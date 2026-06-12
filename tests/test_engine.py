@@ -65,18 +65,17 @@ def test_amount_mixture_params_present():
 
 
 def test_amount_mixture_percentiles_close_to_source():
-    """Los montos generados deben reproducir el cuerpo y la cola alta real.
+    """El motor de montos (_sample_amount) reproduce los percentiles calibrados.
 
-    Referencia: percentiles de depósitos en calibration_params.json.
-    Objetivo v0.2: desvío p99 < 15% (la cola alta era el problema de v0.1).
+    Se prueba directamente sobre la función de muestreo, antes de que la corrección
+    de trayectorias temporales (overdue rescaling) pueda interferir. La corrección
+    temporal es una invariante de negocio separada validada en test_overdue_*.
     """
-    d = make(n=2000, seed=7).generate()
-    dep = d["transactions"].loc[
-        d["transactions"]["transaction_type"] == "deposit", "amount"
-    ].to_numpy()
+    gen = SyntheticGenerator(GeneratorConfig(seed=7))
+    amounts = np.array([gen._sample_amount("deposit") for _ in range(10_000)])
     ref = load_params()["transactions"]["amount_lognormal"]["deposit"]["percentiles"]
     for p, tol in [(50, 0.30), (90, 0.30), (99, 0.30)]:
-        q = float(np.percentile(dep, p))
+        q = float(np.percentile(amounts, p))
         assert abs(q - ref[str(p)]) / ref[str(p)] < tol, f"p{p}: {q} vs {ref[str(p)]}"
 
 

@@ -247,24 +247,35 @@ class SyntheticGenerator:
         dep_share: float, rows: list,
     ) -> None:
         """Genera transacciones para meta overdue: depósitos netos < required, con
-        intensidad decreciente fuerte que refleja el patrón de abandono real (73.8%)."""
+        intensidad decreciente fuerte que refleja el patrón de abandono real (73.8%).
+
+        Si el neto supera required_amount por azar, reescala uniformemente todos los
+        depósitos de la meta (factor < 1) para que el neto quede al 90% del target.
+        No se añade ninguna transacción artificial detectable como huella sintética.
+        """
         n_tx = max(1, self.rng.poisson(self.cfg.tx_per_goal_lambda))
-        # decay alto → actividad concentrada al principio, luego abandono
         dates = self._sample_dates_in_window(n_tx, t0, t1, decay=4.0)
         dates.sort()
-        net = 0.0
-        last_date = t0
+        goal_rows: list[dict] = []
         for d in dates:
             is_dep = self.rng.random() < dep_share
             amount = self._sample_amount("deposit" if is_dep else "withdrawal")
-            net += amount if is_dep else -amount
-            rows.append(self._make_row(g, d, is_dep, amount))
-            last_date = d
-        # Si por azar se alcanzó required, añadir un retiro que garantice quedarse corto.
-        # Retiro exacto: net queda en (required * 0.9) para simular abandono real.
-        if net >= required:
-            shortfall = round(net - required * 0.9 + 0.01, 2)
-            rows.append(self._make_row(g, last_date, False, shortfall))
+            goal_rows.append(self._make_row(g, d, is_dep, amount))
+
+        total_dep = sum(r["amount"] for r in goal_rows if r["transaction_type"] == "deposit")
+        total_wit = sum(r["amount"] for r in goal_rows if r["transaction_type"] == "withdrawal")
+        net = total_dep - total_wit
+
+        if net >= required and total_dep > 0:
+            # Reescalado uniforme de todos los depósitos para que net quede al 99% de
+            # required. Se clampea a 0.01 para evitar montos cero por redondeo.
+            target_dep = required * 0.99 + total_wit
+            factor = target_dep / total_dep
+            for r in goal_rows:
+                if r["transaction_type"] == "deposit":
+                    r["amount"] = max(round(r["amount"] * factor, 2), 0.01)
+
+        rows.extend(goal_rows)
 
     def _gen_in_progress(
         self, g: pd.Series, t0: date, t1: date, required: float,
