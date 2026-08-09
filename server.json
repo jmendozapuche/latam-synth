@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.jmendozapuche/latam-fintech-synthetic-data",
   "title": "LatAm Fintech Synthetic Data",
-  "description": "Generate realistic, privacy-safe synthetic financial users, savings goals and transactions for Latin American fintech testing, AI agents and ML applications.",
+  "description": "Privacy-safe synthetic financial data for LatAm fintech, AI agents, testing and ML.",
   "version": "0.2.0",
   "repository": {
     "url": "https://github.com/jmendozapuche/latam-synth",
