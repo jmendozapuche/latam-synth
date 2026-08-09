@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.jmendozapuche/latam-fintech-synthetic-data",
+  "title": "LatAm Fintech Synthetic Data",
+  "description": "Generate realistic, privacy-safe synthetic financial users, savings goals and transactions for Latin American fintech testing, AI agents and ML applications.",
+  "version": "0.2.0",
+  "repository": {
+    "url": "https://github.com/jmendozapuche/latam-synth",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.apify.com?tools=active_yardstick/latam-synth"
+    }
+  ]
+}
