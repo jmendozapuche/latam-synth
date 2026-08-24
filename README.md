@@ -10,15 +10,19 @@ Generador de datos sintéticos de comportamiento de ahorro financiero, calibrado
 
 ## Model Context Protocol (MCP)
 
-LatAm Synth is available to AI agents as an **MCP tool** through the hosted **Apify MCP Server**.
+LatAm Synth is available to AI agents as an **MCP tool** through two independent paths:
 
-This repository contains the synthetic data generator and the Apify Actor implementation. The MCP transport server itself is provided by Apify, which exposes the `active_yardstick/latam-synth` Actor as a callable MCP tool.
+- **Remote (hosted):** the **Apify MCP Server** exposes the `active_yardstick/latam-synth` Actor as a callable MCP tool over Streamable HTTP. Nothing to install.
+- **Local (stdio):** `latam-synth-mcp`, shipped in this repository, runs the generator in-process without calling Apify. For local MCP clients and containerised catalog checks.
+
+Both paths return the same tables with the same referential integrity, because both are thin adapters over the same `SyntheticGenerator`.
 
 ### MCP details
 
 - **MCP capability:** Tools
-- **Transport:** Streamable HTTP
+- **Transport:** Streamable HTTP (remote) / stdio (local)
 - **Hosted MCP server:** Apify MCP Server
+- **Local MCP server:** `latam-synth-mcp` (extra `[mcp]`, SDK `mcp>=2,<3`)
 - **Actor exposed as tool:** `active_yardstick/latam-synth`
 - **Authentication:** Apify OAuth or Bearer token
 - **Official MCP Registry name:** `io.github.jmendozapuche/latam-fintech-synthetic-data`
@@ -87,7 +91,7 @@ LatAm Synth currently exposes its functionality through **MCP Tools**. It does n
 
 ### How MCP is implemented
 
-LatAm Synth does **not** need to implement an MCP transport server inside this Python repository.
+The remote path does **not** require an MCP transport server inside this repository: Apify hosts it. The local path does ship one (`src/latam_synth/mcp_server.py`), for clients that prefer to run the generator themselves — no token, no network, no per-run cost.
 
 The architecture is:
 
@@ -107,6 +111,39 @@ Synthetic users + goals + transactions
 ```
 
 Apify provides the hosted MCP server and authentication layer. The LatAm Synth Actor provides the executable tool functionality and structured input/output.
+
+### Local MCP server (stdio)
+
+```bash
+pip install -e ".[mcp]"
+latam-synth-mcp                    # entry point
+python -m latam_synth.mcp_server   # equivalent
+```
+
+Configuration for a local MCP client (Claude Desktop / Claude Code):
+
+```json
+{
+  "mcpServers": {
+    "latam-synth": {
+      "command": "latam-synth-mcp"
+    }
+  }
+}
+```
+
+Exposed tools:
+
+| Tool | What it does |
+| --- | --- |
+| `generate_latam_financial_data` | Generates users + goals + transactions. Args: `users` (1-200), `seed`, `countries`, `start_date`, `end_date`. |
+| `describe_latam_synth_dataset` | Returns schema, goal categories, available countries and the privacy policy. No arguments. |
+
+Both are annotated `read_only` and `idempotent`: nothing is written and the same
+seed returns the same dataset. The 200-user cap per call keeps responses small
+enough for an agent context — for larger volumes use the CLI or the Actor.
+
+Deployment detail, Docker image and Glama configuration: [`docs/mcp_local.md`](./docs/mcp_local.md).
 
 ---
 

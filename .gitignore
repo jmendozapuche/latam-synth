@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 output/
 dist/
+.venv/
 # NUNCA commitear datos fuente reales
 *.csv
 !docs/*.csv
