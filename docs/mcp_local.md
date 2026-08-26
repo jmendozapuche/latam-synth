@@ -57,23 +57,39 @@ Se ejecuta con `-i` y sin TTY: stdio es el transporte.
 
 ## Glama
 
-Configuración de build/run para el worker de Glama:
+El worker de Glama clona el repo, construye una imagen y arranca el servidor MCP
+detras de `mcp-proxy`. Configuracion que funciona:
 
 ```json
 {
-  "build": ["uv pip install --system -e '.[mcp]' mcp-proxy"],
-  "cmd": ["mcp-proxy", "--", "latam-synth-mcp"]
+  "build": [
+    "uv venv /opt/venv --python 3.12",
+    "uv pip install --python /opt/venv/bin/python -e '.[mcp]'"
+  ],
+  "cmd": ["mcp-proxy", "--", "/opt/venv/bin/latam-synth-mcp"]
 }
 ```
 
-`mcp-proxy` debe instalarse **en el mismo paso de build** (el worker no lo trae de
-serie); ese fue el único ajuste respecto a la configuración inicial.
+Dos cosas que hay que respetar, aprendidas a golpes:
 
-Estado conocido: el build de Glama falló descargando las imágenes base de Docker Hub
-(`context deadline exceeded`, tanto con `debian:trixie-slim` como con
-`debian:bookworm-slim`). Es un fallo de red del worker, **no** del servidor MCP: la
-verificación stdio local pasa. Si vuelve a ocurrir, la alternativa es pedirles que
-usen `Dockerfile.mcp` directamente.
+**No usar `--system`.** La imagen base de Glama instala Node 24, que arrastra el
+Python 3.13 de Debian a `/usr`. Debian lo marca como *externally managed* (PEP 668)
+y `uv pip install --system` falla ahi con `exit code 2` sin llegar a instalar nada
+nuestro. La imagen tambien instala un Python 3.12 propio via uv, que no tiene esa
+restriccion, pero `--system` no lo elige. De ahi el venv explicito en `/opt/venv`.
+Alternativa de una linea si solo se admite un paso:
+`uv pip install --system --break-system-packages -e '.[mcp]'`.
+
+**Ruta absoluta en el CMD.** Los ejecutables de `/opt/venv` no estan en el PATH del
+contenedor, asi que `latam-synth-mcp` a secas no se encuentra.
+
+**No instalar `mcp-proxy`.** La imagen base ya lo trae (`npm install -g
+mcp-proxy@6.4.3`); anadirlo al build es redundante.
+
+Historico: el primer intento ni siquiera llego a construir — el worker fallaba
+descargando las imagenes base de Docker Hub (`context deadline exceeded`, con
+`debian:trixie-slim` y `debian:bookworm-slim`). Ese problema desaparecio solo. Si
+vuelve a aparecer, la alternativa es pedirles que usen `Dockerfile.mcp`.
 
 ## Tests
 
